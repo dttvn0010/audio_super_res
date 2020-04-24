@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+<div class="container">
+	<div class="mt-3">
+		<div class="row">
+			<div class="col-4">
+				<form id="fmt">
+					<label>Audio wav file (8 Khz)</label>
+					<input name="file" class="form-control-file" type="file">				
+					<button type="button" class="mt-3 btn btn-primary" onclick="upload()">Upload</button>
+				</form>
+			</div>
+			<div id="audio_tab" class="col-6">		
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	var uploading = false;
+	var UPLOAD_URL = "http://35.226.138.244:5000/upload";
+
+	async function upload() {
+		if(uploading) { alert('Please wait...'); return; }
+		uploading = true;
+		
+		document.getElementById('audio_tab').innerHTML = `<div style="position: absolute;left: 0%;top:30%" class="spinner-border"></div>`;
+		
+		var formData = new FormData(document.getElementById("fmt"));
+		
+		var resp = await fetch(UPLOAD_URL, {
+				body: formData,
+				method: "POST"
+			});
+
+		var result = await resp.json();
+		
+		var low_url = result.low_url;
+		var high_url = result.high_url;
+		
+		var html = `<label>8Khz audio</label><br>
+		<audio controls>
+		  <source src="${low_url}" type="audio/wav">
+		</audio>
+		
+		<br><br>
+		<label>Super resolution audio (16Khz)</label><br>
+		<audio controls>
+		  <source src="${high_url}" type="audio/wav">
+		</audio>`;
+		
+		document.getElementById('audio_tab').innerHTML = html;
+		uploading = false;
+	}
+</script>
